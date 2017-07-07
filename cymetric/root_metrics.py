@@ -50,6 +50,7 @@ def root_metric(obj=None, name=None, schema=None, *args, **kwargs):
 #core tables
 resources = root_metric(name='Resources')
 compositions = root_metric(name='Compositions')
+inventorycomposition = root_metric(name='InventoryComposition')
 recipes = root_metric(name='Recipes')
 products = root_metric(name='Products')
 res_creators = root_metric(name='ResCreators')

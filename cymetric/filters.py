@@ -163,7 +163,7 @@ def transactions_decayheat(evaler, senders=(), receivers=(), commodities=(), nuc
     return df
 
 
-def inventories(evaler, facilities=(), nucs=()):
+def inventories(evaler, facilities=()):
     """
     Shape the reduced inventory Data Frame. Applying nuclides/facilities selection when required.
 
@@ -176,30 +176,52 @@ def inventories(evaler, facilities=(), nucs=()):
 
     # Get inventory table
     agents = evaler.eval('AgentEntry')
-
-    rdc_table = []  # because we want to get rid of the nuclide asap
-    if len(nucs) != 0:
-        nucs = format_nucs(nucs)
-        rdc_table.append(['NucId', nucs])
-
-    conditionnal_agent = []
-    df = pd.DataFrame()
+    rdc_table = []
     if len(facilities) != 0:
         agents = agents[agents['Prototype'].isin(facilities)]
-        dfs = []
-        for id in agents['AgentId'].tolist():
-            conditionnal_agent = ('AgentId','==',id)
-            dfs.append(evaler.eval('ExplicitInventory', conds=[conditionnal_agent]))
-            df = pd.concat(dfs)
+        rdc_table.append(['AgentId', agents['AgentId'].tolist()])
     else:
         wng_msg = "no faciity provided"
         warnings.warn(wng_msg, UserWarning)
-        df = evaler.eval('ExplicitInventory')
+    df = evaler.eval('ExplicitInventory')
     df = reduce(df, rdc_table)
 
     base_col = ['SimId', 'AgentId']
     added_col = base_col + ['Prototype']
     df = merge(df, base_col, agents, added_col)
+    return df
+
+
+def inventories_nuc(evaler, facilities=(), nucs=()):
+    """
+    Shape the reduced inventory Data Frame. Applying nuclides/facilities selection when required.
+
+    Parameters
+    ----------
+    evaler : evaler
+    facilities :  of the facility
+    nucs :  of nuclide to select.
+    """
+   
+    if len(nucs) != 0:
+        nucs = format_nucs(nucs)
+        
+        dfs = []
+        for nuc in nucs:
+            conditionnal_nuc = ('NucId','==',nuc)
+            dfs.append(evaler.eval('InventoryComposition',
+                conds=[conditionnal_nuc]))
+            compo = pd.concat(dfs)
+    else:
+        wng_msg = "no faciity provided"
+        warnings.warn(wng_msg, UserWarning)
+        compo = evaler.eval('InventoryComposition')
+
+    df = inventories(evaler, facilities).drop('Mass', 1)
+
+    base_col = ['SimId', 'CompositionId']
+    added_col = base_col + ['NucId', 'Mass']
+    df = merge(df, base_col, compo, added_col)
 
     return df
 
@@ -219,9 +241,9 @@ def inventories_activity(evaler, facilities=(), nucs=()):
     if len(nucs) != 0:
         nucs = format_nucs(nucs)
 
-    df = inventories(evaler, facilities, nucs)
+    df = inventories_nuc(evaler, facilities, nucs)
     for i, row in df.iterrows():
-        val = 1000 * data.N_A * row['Quantity'] * \
+        val = 1000 * data.N_A * row['Mass'] * \
             data.decay_const(int(row['NucId']))
         df.set_value(i, 'Activity', val)
 

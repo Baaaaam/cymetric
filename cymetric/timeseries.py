@@ -125,17 +125,18 @@ def inventories(evaler, facilities=(), nucs=()):
     facilities :  of the facility
     nucs :  of nuclide to select.
     """
-
+    df = pd.DataFrame()
     if len(nucs) != 0:
         nucs = tools.format_nucs(nucs)
+        df = filters.inventories_nuc(evaler, facilities, nucs)
     else:
         wng_msg = "no nuclide provided"
         warnings.warn(wng_msg, UserWarning)
+        df = filters.inventories(evaler, facilities)
 
-    df = filters.inventories(evaler, facilities, nucs)
-
+    df.rename(columns = {'Quantity':'Mass'}, inplace = True)
     group_end = ['Time']
-    group_start = group_end + ['Quantity']
+    group_start = group_end + ['Mass']
     df = df[group_start].groupby(group_end).sum()
     df.reset_index(inplace=True)
 
