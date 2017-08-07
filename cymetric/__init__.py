@@ -14,6 +14,9 @@ try:
     from cymetric.evaluator import METRIC_REGISTRY, register_metric, \
         raw_to_series, Evaluator, eval
     from cymetric.execution import ExecutionContext, exec_code
+    import cymetric.filters
+    import cymetric.timeseries
+    import cymetric.graphs
 except ImportError:
     # again with the wacky CI issues
     from .tools import dbopen

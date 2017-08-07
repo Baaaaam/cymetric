@@ -1,3 +1,5 @@
+"""Filters for cymetric's metrics.
+"""
 import warnings
 import pandas as pd
 import numpy as np

@@ -1,3 +1,5 @@
+"""Metrics as timeseries.
+"""
 import warnings
 
 import pandas as pd
