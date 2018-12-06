@@ -9,7 +9,6 @@ try:
     from cymetric.tools import dbopen
     from cymetric.schemas import schema, canon_dbtype, canon_shape, \
         canon_column, canon_name
-    from cymetric.root_metrics import root_metric
     from cymetric.metrics import Metric, metric
     from cymetric.evaluator import METRIC_REGISTRY, register_metric, \
         raw_to_series, Evaluator, eval
@@ -19,7 +18,6 @@ except ImportError:
     from .tools import dbopen
     from .schemas import schema, canon_dbtype, canon_shape, \
         canon_column, canon_name
-    from .root_metrics import root_metric
     from .metrics import Metric, metric
     from .evaluator import METRIC_REGISTRY, register_metric, \
         raw_to_series, Evaluator, eval

@@ -50,8 +50,8 @@ def main():
     scripts = [s for s in scripts if ((IS_NT and s.endswith('.bat'))
                                       or (not IS_NT and
                                           not s.endswith('.bat')))]
-    packages = ['cymetric']
-    pack_dir = {'cymetric': 'cymetric'}
+    packages = ['cymetric', 'metrics']
+    pack_dir = {'cymetric': 'cymetric', 'metrics': 'metrics'}
     setup_kwargs = {
         "name": "cymetric",
         "version": VERSION,
