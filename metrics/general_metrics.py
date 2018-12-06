@@ -173,7 +173,7 @@ del _dsdeps, _dsschema
 # Agents
 _agentsdeps = ['AgentEntry', 'AgentExit', 'DecomSchedule', 'Info']
 
-_agentsschema = schemas.schema([
+_agentsschema = [
     ('SimId', ts.UUID),
     ('AgentId', ts.INT),
     ('Kind', ts.STRING),
@@ -183,7 +183,7 @@ _agentsschema = schemas.schema([
     ('Lifetime', ts.INT),
     ('EnterTime', ts.INT),
     ('ExitTime', ts.INT),
-    ])
+    ]
 
 @metric(name='Agents', depends=_agentsdeps, schema=_agentsschema)
 def agents(entry, exit, decom, info):
@@ -194,21 +194,31 @@ def agents(entry, exit, decom, info):
     significant amounts of missing data.
     """
     mergeon = ['SimId', 'AgentId']
-    ent = tools.raw_to_series(entry, ['SimId', 'AgentId'], 'Kind')
-    idx = ent.index
     df = entry[['SimId', 'AgentId', 'Kind', 'Spec', 'Prototype', 'ParentId',
                 'Lifetime', 'EnterTime']]
+    
+    ent = tools.raw_to_series(entry, ['SimId', 'AgentId'], 'Kind')
+    print(ent)
+    idx = ent.index
     if exit is None:
-        agent_exit = pd.Series(index=idx, data=[np.nan]*len(idx))
-        agent_exit.name = 'ExitTime'
+        exit = ent.copy() 
+        exit['ExitTime'] = NaN
+        print("if")
+        print(exit)
+        exit = exit.reindex()
     else:
-        agent_exit = agent_exit.reindex(index=idx)
-    df = pd.merge(df, agent_exit.reset_index(), on=mergeon)
+        exit = exit.reindex()
+        print("else")
+        print(exit)
+    print("out if")
+    print(exit) 
+    df = pd.merge(df, exit, on=mergeon)
+    print(df) 
     if decom is not None:
         df = tools.merge_and_fillna_col(df, decom[['SimId', 'AgentId', 'DecomTime']],
                                         'ExitTime', 'DecomTime', on=mergeon)
-    df = tools.merge_and_fillna_col(df, info[['SimId', 'Duration']],
-                                    'ExitTime', 'Duration', on=['SimId'])
+    #df = tools.merge_and_fillna_col(df, info[['SimId', 'Duration']],
+     #                               'ExitTime', 'Duration', on=['SimId'])
     return df
 
 del _agentsdeps, _agentsschema
