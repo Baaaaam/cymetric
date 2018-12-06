@@ -198,27 +198,19 @@ def agents(entry, exit, decom, info):
                 'Lifetime', 'EnterTime']]
     
     ent = tools.raw_to_series(entry, ['SimId', 'AgentId'], 'Kind')
-    print(ent)
     idx = ent.index
     if exit is None:
         exit = ent.copy() 
         exit['ExitTime'] = NaN
-        print("if")
-        print(exit)
         exit = exit.reindex()
     else:
         exit = exit.reindex()
-        print("else")
-        print(exit)
-    print("out if")
-    print(exit) 
     df = pd.merge(df, exit, on=mergeon)
-    print(df) 
     if decom is not None:
         df = tools.merge_and_fillna_col(df, decom[['SimId', 'AgentId', 'DecomTime']],
                                         'ExitTime', 'DecomTime', on=mergeon)
-    #df = tools.merge_and_fillna_col(df, info[['SimId', 'Duration']],
-     #                               'ExitTime', 'Duration', on=['SimId'])
+    df = tools.merge_and_fillna_col(df, info[['SimId', 'Duration']],
+                                    'ExitTime', 'Duration', on=['SimId'])
     return df
 
 del _agentsdeps, _agentsschema
