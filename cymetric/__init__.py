@@ -13,6 +13,8 @@ try:
     from cymetric.evaluator import METRIC_REGISTRY, register_metric, \
         raw_to_series, Evaluator, eval
     from cymetric.execution import ExecutionContext, exec_code
+    from cymetric.metrics_def import root_metrics
+    from cymetric.metrics_def import general_metrics
 except ImportError:
     # again with the wacky CI issues
     from .tools import dbopen
@@ -22,6 +24,8 @@ except ImportError:
     from .evaluator import METRIC_REGISTRY, register_metric, \
         raw_to_series, Evaluator, eval
     from .execution import ExecutionContext, exec_code
+    from .metrics_def import root_metrics
+    from .metrics_def import general_metrics
 
 __version__ = '1.5.3'
 
