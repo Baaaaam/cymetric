@@ -28,8 +28,8 @@ _matschema = [
     ('TimeCreated', ts.INT),
     ('NucId', ts.INT),
     ('Units', ts.STRING),
-    ('Mass', ts.DOUBLE)
-    ]
+    ('Mass', ts.DOUBLE)]
+
 
 @metric(name='Materials', depends=_matdeps, schema=_matschema)
 def materials(rsrcs, comps):
@@ -38,7 +38,7 @@ def materials(rsrcs, comps):
     ResourceId, ObjId, TimeCreated, and NucId.
     """
     x = pd.merge(rsrcs, comps, on=['SimId', 'QualId'], how='inner')
-    x = x.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId','TimeCreated',
+    x = x.set_index(['SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated',
                      'NucId', 'Units'])
     y = x['Quantity'] * x['MassFrac']
     y.name = 'Mass'
@@ -59,8 +59,8 @@ _actschema = [
     ('ObjId', ts.INT),
     ('TimeCreated', ts.INT),
     ('NucId', ts.INT),
-    ('Activity', ts.DOUBLE)
-    ]
+    ('Activity', ts.DOUBLE)]
+
 
 @metric(name='Activity', depends=_actdeps, schema=_actschema)
 def activity(mats):
@@ -70,17 +70,19 @@ def activity(mats):
     """
     tools.raise_no_pyne('Activity could not be computed', HAVE_PYNE)
     mass = tools.raw_to_series(mats,
-                               ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'),
+                               ('SimId', 'QualId', 'ResourceId',
+                                'ObjId', 'TimeCreated', 'NucId'),
                                'Mass')
     act = []
     for (simid, qual, res, obj, time, nuc), m in mass.iteritems():
-        val = (1000 * data.N_A * m * data.decay_const(nuc) \
-              / data.atomic_mass(nuc))
+        val = (1000 * data.N_A * m * data.decay_const(nuc)
+               / data.atomic_mass(nuc))
         act.append(val)
     act = pd.Series(act, index=mass.index)
     act.name = 'Activity'
     rtn = act.reset_index()
     return rtn
+
 
 del _actdeps, _actschema
 
@@ -95,8 +97,8 @@ _dhschema = [
     ('ObjId', ts.INT),
     ('TimeCreated', ts.INT),
     ('NucId', ts.INT),
-    ('DecayHeat', ts.DOUBLE)
-    ]
+    ('DecayHeat', ts.DOUBLE)]
+
 
 @metric(name='DecayHeat', depends=_dhdeps, schema=_dhschema)
 def decay_heat(acts):
@@ -106,7 +108,8 @@ def decay_heat(acts):
     """
     tools.raise_no_pyne('DecayHeat could not be computed', HAVE_PYNE)
     act = tools.raw_to_series(acts,
-                              ('SimId', 'QualId', 'ResourceId', 'ObjId', 'TimeCreated', 'NucId'),
+                              ('SimId', 'QualId', 'ResourceId',
+                               'ObjId', 'TimeCreated', 'NucId'),
                               'Activity')
     dh = []
     for (simid, qual, res, obj, time, nuc), a in act.iteritems():
@@ -117,6 +120,7 @@ def decay_heat(acts):
     rtn = dh.reset_index()
     return rtn
 
+
 del _dhdeps, _dhschema
 
 
@@ -124,9 +128,11 @@ del _dhdeps, _dhschema
 _bsdeps = ['AgentEntry']
 
 _bsschema = [
-    ('SimId', ts.UUID), ('EnterTime', ts.INT), ('Prototype', ts.STRING),
-    ('Count', ts.INT)
-    ]
+    ('SimId', ts.UUID), 
+    ('EnterTime', ts.INT), 
+    ('Prototype', ts.STRING),
+    ('Count', ts.INT)]
+
 
 @metric(name='BuildSeries', depends=_bsdeps, schema=_bsschema)
 def build_series(entry):
@@ -149,8 +155,8 @@ _dsschema = [
     ('SimId', ts.UUID),
     ('ExitTime', ts.INT),
     ('Prototype', ts.STRING),
-    ('Count', ts.INT)
-    ]
+    ('Count', ts.INT)]
+
 
 @metric(name='DecommissionSeries', depends=_dsdeps, schema=_dsschema)
 def decommission_series(entry, exit):
@@ -167,6 +173,7 @@ def decommission_series(entry, exit):
     rtn = count.reset_index()
     return rtn
 
+
 del _dsdeps, _dsschema
 
 
@@ -182,8 +189,8 @@ _agentsschema = [
     ('ParentId', ts.INT),
     ('Lifetime', ts.INT),
     ('EnterTime', ts.INT),
-    ('ExitTime', ts.INT),
-    ]
+    ('ExitTime', ts.INT),]
+
 
 @metric(name='Agents', depends=_agentsdeps, schema=_agentsschema)
 def agents(entry, exit, decom, info):
@@ -196,11 +203,11 @@ def agents(entry, exit, decom, info):
     mergeon = ['SimId', 'AgentId']
     df = entry[['SimId', 'AgentId', 'Kind', 'Spec', 'Prototype', 'ParentId',
                 'Lifetime', 'EnterTime']]
-    
+
     ent = tools.raw_to_series(entry, ['SimId', 'AgentId'], 'Kind')
     idx = ent.index
     if exit is None:
-        exit = ent.copy() 
+        exit = ent.copy()
         exit['ExitTime'] = NaN
         exit = exit.reindex()
     else:
@@ -212,6 +219,7 @@ def agents(entry, exit, decom, info):
     df = tools.merge_and_fillna_col(df, info[['SimId', 'Duration']],
                                     'ExitTime', 'Duration', on=['SimId'])
     return df
+
 
 del _agentsdeps, _agentsschema
 
@@ -229,8 +237,8 @@ _transschema = [
     ('ReceiverId', ts.INT),
     ('Commodity', ts.STRING),
     ('Units', ts.STRING),
-    ('Quantity', ts.DOUBLE)
-    ]
+    ('Quantity', ts.DOUBLE)]
+
 
 @metric(name='TransactionQuantity', depends=_transdeps, schema=_transschema)
 def transaction_quantity(mats, tranacts):
@@ -238,13 +246,14 @@ def transaction_quantity(mats, tranacts):
     the simulation.
     """
     trans_index = ['SimId', 'TransactionId', 'ResourceId', 'ObjId',
-            'TimeCreated', 'SenderId', 'ReceiverId', 'Commodity', 'Units']
+                   'TimeCreated', 'SenderId', 'ReceiverId', 'Commodity', 'Units']
     trans = pd.merge(mats, tranacts, on=['SimId', 'ResourceId'], how='inner')
     trans = trans.set_index(trans_index)
     trans = trans.groupby(level=trans_index)['Mass'].sum()
     trans.name = 'Quantity'
     rtn = trans.reset_index()
     return rtn
+
 
 del _transdeps, _transschema
 
@@ -258,8 +267,8 @@ _invschema = [
     ('Time', ts.INT),
     ('InventoryName', ts.STRING),
     ('NucId', ts.INT),
-    ('Quantity', ts.DOUBLE)
-    ]
+    ('Quantity', ts.DOUBLE)]
+
 
 @metric(name='ExplicitInventoryByAgent', depends=_invdeps, schema=_invschema)
 def explicit_inventory_by_agent(expinv):
@@ -268,12 +277,14 @@ def explicit_inventory_by_agent(expinv):
     """
     inv_index = ['SimId', 'AgentId', 'Time', 'InventoryName', 'NucId']
     inv = tools.raw_to_series(expinv,
-                              ['SimId', 'AgentId', 'Time', 'InventoryName', 'NucId'],
+                              ['SimId', 'AgentId', 'Time',
+                                  'InventoryName', 'NucId'],
                               'Quantity')
     inv = inv.groupby(level=inv_index).sum()
     inv.name = 'Quantity'
     rtn = inv.reset_index()
     return rtn
+
 
 del _invdeps, _invschema
 
@@ -286,8 +297,8 @@ _invschema = [
     ('Time', ts.INT),
     ('InventoryName', ts.STRING),
     ('NucId', ts.INT),
-    ('Quantity', ts.DOUBLE)
-    ]
+    ('Quantity', ts.DOUBLE)]
+
 
 @metric(name='ExplicitInventoryByNuc', depends=_invdeps, schema=_invschema)
 def explicit_inventory_by_nuc(expinv):
@@ -304,6 +315,7 @@ def explicit_inventory_by_nuc(expinv):
     rtn = inv.reset_index()
     return rtn
 
+
 del _invdeps, _invschema
 
 
@@ -314,8 +326,8 @@ _egschema = [
     ('SimId', ts.UUID),
     ('AgentId', ts.INT),
     ('Year', ts.INT),
-    ('Energy', ts.DOUBLE)
-    ]
+    ('Energy', ts.DOUBLE)]
+
 
 @metric(name='AnnualElectricityGeneratedByAgent', depends=_egdeps, schema=_egschema)
 def annual_electricity_generated_by_agent(elec):
@@ -325,13 +337,14 @@ def annual_electricity_generated_by_agent(elec):
     """
     elec = pd.DataFrame(data={'SimId': elec.SimId,
                               'AgentId': elec.AgentId,
-                              'Year': elec.Time.apply(lambda x: x//12),
-                              'Energy': elec.Value.apply(lambda x: x/12)},
-			columns=['SimId', 'AgentId', 'Year', 'Energy'])
+                              'Year': elec.Time.apply(lambda x: x // 12),
+                              'Energy': elec.Value.apply(lambda x: x / 12)},
+                        columns=['SimId', 'AgentId', 'Year', 'Energy'])
     el_index = ['SimId', 'AgentId', 'Year']
     elec = elec.groupby(el_index).sum()
     rtn = elec.reset_index()
     return rtn
+
 
 del _egdeps, _egschema
 
@@ -349,8 +362,8 @@ _tldeps = ['Info']
 
 _tlschema = [
     ('SimId', ts.UUID),
-    ('TimeStep', ts.INT)
-    ]
+    ('TimeStep', ts.INT)]
+
 
 @metric(name='TimeList', depends=_tldeps, schema=_tlschema)
 def timelist(info):
@@ -367,4 +380,3 @@ def timelist(info):
 
 
 del _tldeps, _tlschema
-
