@@ -16,7 +16,7 @@ try:
 except ImportError:
     HAVE_PYNE = False
 
-from cyclus import lib
+from cyclus_backend import lib
 
 
 EXT_BACKENDS = {'.h5': lib.Hdf5Back, '.sqlite': lib.SqliteBack}

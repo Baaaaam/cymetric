@@ -3,7 +3,7 @@
 from __future__ import unicode_literals, print_function
 
 import pandas as pd
-from cyclus import lib
+from cyclus_backend import lib
 
 from cymetric.tools import raw_to_series
 

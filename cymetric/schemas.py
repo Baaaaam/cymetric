@@ -8,8 +8,8 @@ if sys.version_info[0] > 2:
 else:
     str_types = (str, unicode)
 
-from cyclus import typesystem as ts
-from cyclus.typesystem import NAMES, RANKS, IDS
+from cyclus_backend import typesystem as ts
+from cyclus_backend.typesystem import NAMES, RANKS, IDS
 
 
 def canon_dbtype(dbtype):

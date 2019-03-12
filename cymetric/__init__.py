@@ -1,8 +1,8 @@
 """Cymetric: The Cyclus Analysis Toolkit"""
 from __future__ import unicode_literals, print_function
 
-from cyclus.typesystem import *  # only grabs code generated defintiions
-from cyclus.lib import Datum, FullBackend, SqliteBack, Hdf5Back, \
+from cyclus_backend.typesystem import *  # only grabs code generated defintiions
+from cyclus_backend.lib import Datum, FullBackend, SqliteBack, Hdf5Back, \
         Recorder
 
 try:

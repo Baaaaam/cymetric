@@ -6,7 +6,7 @@ try:
     HAVE_PYNE = True
 except ImportError:
     HAVE_PYNE = False
-from cyclus import typesystem as ts
+from cyclus_backend import typesystem as ts
 
 from cymetric import metric
 from cymetric import tools

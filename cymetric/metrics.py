@@ -13,8 +13,8 @@ try:
 except ImportError:
     HAVE_PYNE = False
 
-from cyclus import lib
-from cyclus import typesystem as ts
+from cyclus_backend import lib
+from cyclus_backend import typesystem as ts
 
 try:
     from cymetric import schemas
